@@ -2,74 +2,111 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 
-const Login = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+function Login() {
 
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const [email, setEmail] = useState("");
+
+  const [password, setPassword] = useState("");
+
+  const [message, setMessage] = useState("");
 
   const handleLogin = async (e) => {
+
     e.preventDefault();
 
     try {
-      const res = await axios.post(
+
+      const response = await axios.post(
         "https://s-blog-platform.onrender.com/api/auth/login",
-        formData
+        {
+          email,
+          password,
+        }
       );
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      localStorage.setItem(
+        "token",
+        response.data.token
+      );
 
-      navigate("/blogs");
+      setMessage(response.data.message);
+
+      setTimeout(() => {
+
+        navigate("/blogs");
+
+      }, 1000);
+
     } catch (error) {
-      alert(error.response?.data?.message || "Login Failed");
+
+      setMessage(error.response.data.message);
+
     }
   };
 
   return (
-    <div className="auth-container">
-      <form className="auth-form" onSubmit={handleLogin}>
-        <h2>Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Enter Email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
+      <div className="bg-white p-8 rounded-2xl shadow-lg w-[400px]">
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Enter Password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
+        <h1 className="text-3xl font-bold text-center mb-6">
+          Login
+        </h1>
 
-        <button type="submit">Login</button>
+        {
+          message && (
+            <p className="bg-blue-100 text-blue-700 p-3 rounded-lg mb-4 text-center">
+              {message}
+            </p>
+          )
+        }
 
-        <p>
-          Don’t have an account? <Link to="/signup">Signup</Link>
+        <form
+          onSubmit={handleLogin}
+          className="flex flex-col gap-4"
+        >
+
+          <input
+            type="email"
+            placeholder="Enter your email"
+            className="border p-3 rounded-lg outline-none"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+
+          <input
+            type="password"
+            placeholder="Enter your password"
+            className="border p-3 rounded-lg outline-none"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <button className="bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition">
+            Login
+          </button>
+
+        </form>
+
+        <p className="text-center mt-5 text-gray-600">
+
+          Forgot Password?
+
+          <Link
+            to="/forgot-password"
+            className="text-blue-600 ml-2"
+          >
+            Reset
+          </Link>
+
         </p>
 
-        <p>
-          <Link to="/forgot-password">Forgot Password?</Link>
-        </p>
-      </form>
+      </div>
+
     </div>
   );
-};
+}
 
 export default Login;
